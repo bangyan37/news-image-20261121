@@ -22,6 +22,13 @@ def main() -> None:
     shutil.copyfile(IMAGE, target)
     if target.stat().st_size != IMAGE.stat().st_size:
         raise RuntimeError("output image size mismatch")
+    # The stored image is JPEG bytes under a .png name, which the rules
+    # allow; verify its magic bytes so a corrupted file fails loudly here
+    # instead of reaching the judge.
+    with target.open("rb") as fh:
+        magic = fh.read(3)
+    if magic != b"\xff\xd8\xff":
+        raise RuntimeError("output image is not a JPEG")
 
 
 if __name__ == "__main__":
